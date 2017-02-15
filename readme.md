@@ -1,4 +1,5 @@
 project in Ruby 2.3.0
+
 ~/$> ruby main.rb
 
 <strong>Toy Robot Simulator challenge</strong>
