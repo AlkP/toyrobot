@@ -2,6 +2,8 @@ project in Ruby 2.3.0
 
 ~/$> ruby main.rb
 
+~/$> ruby test_unit.rb
+
 <strong>Toy Robot Simulator challenge</strong>
 
 Description:

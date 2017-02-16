@@ -57,6 +57,10 @@ class Robot
     return false
   end
   
+  def report
+    return self.x, self.y, self.f
+  end
+  
   protected
   
   def accept_new_values(new)
