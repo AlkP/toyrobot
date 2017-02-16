@@ -20,19 +20,16 @@ module Message
     },
     robot: {
       wrong: 'Error create',
-      null: 'Robot not created',
+      null: 'Robot not on board',
       new: 'Robot was created',
       destroyed: 'Robot destroyed',
+      double: 'Destroy old before create new',
       current_position: "Current position X: Xos; Y: Yos; F: Fos "
     }
   }
   
   def self.available
     @message[:available]
-  end
-  
-  def self.wrong_command
-    @message[:system][:wrong]
   end
   
   def self.robot(command)

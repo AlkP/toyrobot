@@ -2,8 +2,6 @@ require "./include/message.rb"
 require "./include/robot.rb"
 
 class Main
-    
-  @@cardinal_direction = { 'NORTH': 1, 'EAST': 2, 'SOUTH': 3, 'WEST': 4 }
   
   def initial
     @robot = nil
@@ -16,7 +14,7 @@ class Main
       
       case commamd
       when 'PLACE'
-        add_new_robot(option)
+        add_robot_on_board(option)
       when 'MOVE'
         send_option('move_robot')
       when 'LEFT'
@@ -26,7 +24,7 @@ class Main
       when 'REPORT'
         report_about_current_position
       when 'DESTROY'
-        destroy_robot
+        send_option('destroy_robot')
       when 'Q'
         quit
       else
@@ -38,78 +36,34 @@ class Main
   private
   
   def send_option(command)
-    unless check_robot_status
-      puts Message.robot(:null)
-    else
+    if robot_on_board?
       send command
+    # else
+    #   puts Message.robot(:null)
     end
   end
   
-  def available_commands
-    system 'clear'
-    puts Message.available
-  end
-  
-  def add_new_robot(option)
-    x, y, f = option.split(',').map{|p| p.strip }
-    @robot = Robot.new(x, y, f) if check_cardinal_direction(f)
-    available_commands
+  def add_robot_on_board(option)
+    if robot_on_board?
+      puts Message.robot(:double)
+    else
+      x, y, f = option.split(',').map{|p| p.strip }
+      @robot = Robot.new(x, y, f)
+      @robot = nil unless @robot.valid?
+      available_commands
+    end
   end
   
   def move_robot
-    x_new = @robot.x
-    y_new = @robot.y
-    case @robot.f
-    when 'NORTH'
-      x_new += 1
-    when 'EAST'
-      x_new += 1
-    when 'SOUTH'
-      y_new -= 1
-    when 'WEST'
-      x_new -= 1
-    end
-    if check_out_of_range(x_new, y_new)
-      @robot.x, @robot.y = x_new, y_new
-    end
+    @robot.move!
   end
   
   def rotate_left_robot
-    direction = @@cardinal_direction[@robot.f.to_sym] - 1
-    if direction == 0
-      @robot.f = 'WEST' 
-    else
-      @@cardinal_direction.each_key do |key|
-        @robot.f = key.to_s if @@cardinal_direction[key] == direction
-      end
-    end
+    @robot.left!
   end
   
   def rotate_right_robot
-    direction = @@cardinal_direction[@robot.f.to_sym] + 1
-    if direction == 5
-      @robot.f = 'NORTH' 
-    else
-      @@cardinal_direction.each_key do |key|
-        @robot.f = key.to_s if @@cardinal_direction[key] == direction
-      end
-    end
-  end
-  
-  def report_about_current_position
-    puts Message.robot(:current_position)
-                .gsub('Xos', @robot.x.to_s)
-                .gsub('Yos', @robot.y.to_s)
-                .gsub('Fos', @robot.f)
-  end
-  
-  def destroy_robot
-    @robot = nil
-    puts Message.robot(:destroyed)
-  end
-  
-  def wrong_command
-    puts Message.wrong_command
+    @robot.right!
   end
   
   def feedback
@@ -121,24 +75,37 @@ class Main
     return command, option
   end
   
+  def robot_on_board?
+    return (@robot.nil?) ? false : true
+  end
+  
+  def report_about_current_position
+    if robot_on_board?
+      puts Message.robot(:current_position)
+                  .gsub('Xos', @robot.x.to_s)
+                  .gsub('Yos', @robot.y.to_s)
+                  .gsub('Fos', @robot.f)
+    else
+      puts Message.robot(:null)
+    end
+  end
+  
+  def available_commands
+    system 'clear'
+    puts Message.available
+  end
+  
+  def wrong_command
+    puts Message.system(:wrong)
+  end
+  
+  def destroy_robot
+    @robot = nil
+    puts Message.robot(:destroyed)
+  end
+  
   def quit
     exit
-  end
-  
-  private
-  
-  def check_robot_status
-    return (@robot.nil? || !@robot.valid?) ? false : true
-  end
-  
-  def check_cardinal_direction(direction)
-    return ['NORTH', 'SOUTH', 'EAST', 'WEST'].include?(direction)
-  end
-  
-  def check_out_of_range(x,y)
-    return false if x < 0 || x > 4
-    return false if y < 0 || y > 4
-    return true
   end
   
 end
